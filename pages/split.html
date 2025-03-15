@@ -1,9 +1,12 @@
+<!-- Version 1.4 -->
 <!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>长图分割 - Markdown 图片生成器</title>
+    <title>1. 生成图片-2.长按图片保存</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -15,7 +18,7 @@
             margin: 0;
             padding: 0;
             min-height: 100vh;
-            background: #0d1117;
+            background: #0d1117;  /* GitHub 深色模式背景色 */
         }
 
         body {
@@ -24,95 +27,225 @@
             flex-direction: column;
             align-items: center;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-            color: #c9d1d9;
-            padding: 2rem;
+            background: #0d1117;
         }
 
-        .container {
-            max-width: 800px;
-            width: 100%;
+        #mainPage {
+            width: 700px;  /* 改为 700px */
+            min-height: fit-content;
+            background: #0d1117;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            margin: 0 auto;  /* 居中显示 */
         }
 
-        .nav {
-            margin-bottom: 2rem;
-        }
-
-        .nav a {
-            color: #58a6ff;
-            text-decoration: none;
-        }
-
-        .nav a:hover {
-            text-decoration: underline;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 2rem;
-            color: #58a6ff;
-        }
-
-        .card {
+        .button-area {
+            width: 700px;
             background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            padding: 2rem;
-            margin-bottom: 2rem;
+            border-bottom: 1px solid #30363d;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 0;  /* 确保没有底部边距 */
+        }
+
+        .settings-area {
+            display: flex;
+            gap: 20px;
+            align-items: center;
         }
 
         .input-group {
-            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .input-group label {
-            display: block;
-            margin-bottom: 0.5rem;
             color: #c9d1d9;
+            font-size: 14px;
         }
 
-        .input-group input[type="file"],
-        .input-group input[type="number"] {
-            width: 100%;
-            padding: 0.5rem;
+        .input-group input {
+            background: #0d1117;
             border: 1px solid #30363d;
             border-radius: 6px;
-            background: #0d1117;
             color: #c9d1d9;
-            margin-bottom: 1rem;
+            padding: 4px 8px;
+            font-size: 14px;
+            width: 200px;
         }
 
-        .input-group input[type="file"] {
-            padding: 0.5rem 0;
-        }
-
-        .preview-area {
-            width: 100%;
-            min-height: 200px;
-            border: 2px dashed #30363d;
-            border-radius: 6px;
-            margin: 1rem 0;
+        .content-area {
+            width: 700px;
+            padding: 0 10px;  /* 移除顶部内边距 */
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
+        }
+
+        .content-wrapper {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;  /* 移除间距 */
+        }
+
+        .emoji-container {
+            width: 100%;
+            display: flex;
+            justify-content: space-evenly;
+            padding: 0;  /* 移除内边距 */
+            margin-bottom: 5px;  /* 只保留底部一点间距 */
+        }
+
+        .emoji {
+            font-size: 24px;
+        }
+
+        .card {
+            width: 650px;  /* 改为 650px */
+            padding: 16px;
+            background: #161b22;  /* GitHub 深色模式卡片背景色 */
+            border: 1px solid #30363d;  /* GitHub 深色模式边框 */
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            color: #c9d1d9 !important;  /* GitHub 深色模式文本颜色 */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .timestamp {
+            font-size: 14px;
+            color: #8b949e;  /* GitHub 深色模式次要文本颜色 */
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .stats {
+            display: none;  /* 隐藏统计信息 */
+        }
+
+        .card-text, .rendered-content {
+            font-size: 16px;
+            line-height: 1.5;
+            color: #c9d1d9;
+            text-align: left;
+            min-height: 100px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            width: 100%;
+            display: block;
+            max-width: 100%;
+            overflow: auto;
+        }
+
+        /* Markdown 样式 */
+        .card-text ul, .card-text ol,
+        .rendered-content ul, .rendered-content ol {
+            margin: 0 !important;
+            padding-left: 2em;
+        }
+
+        .card-text ul ul, .rendered-content ul ul {
+            list-style-type: circle;
+            margin: 0 !important;
+        }
+
+        .card-text li, .rendered-content li {
+            margin: 0.4em 0;
+        }
+
+        .card-text pre, .rendered-content pre {
+            font-size: 14px;
+            line-height: 1.45;
+            background-color: #0d1117;
+            padding: 16px;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: #c9d1d9;
+            margin: 0.8em 0 !important;
+        }
+
+        .card-text code, .rendered-content code {
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+            font-size: 14px;
+            padding: 0.2em 0.4em;
+            background-color: rgba(110,118,129,0.4);
+            border-radius: 6px;
+            color: #c9d1d9;
+        }
+
+        .card-text p, .rendered-content p {
+            margin: 0 !important;
+        }
+
+        .card-text h1, .card-text h2, .card-text h3, .card-text h4, .card-text h5, .card-text h6,
+        .rendered-content h1, .rendered-content h2, .rendered-content h3, .rendered-content h4, .rendered-content h5, .rendered-content h6 {
+            margin: 0.5em 0 0.3em !important;
+            line-height: 1.3;
+        }
+
+        /* 特殊处理段落后面紧跟的标题 */
+        .card-text p + h1, .card-text p + h2, .card-text p + h3, .card-text p + h4, .card-text p + h5, .card-text p + h6,
+        .rendered-content p + h1, .rendered-content p + h2, .rendered-content p + h3, .rendered-content p + h4, .rendered-content p + h5, .rendered-content p + h6 {
+            margin-top: 0.3em !important;
+        }
+
+        .card-text blockquote, .rendered-content blockquote {
+            margin: 0.8em 0 !important;
+            padding: 0.4em 1em;
+            border-left: 0.25em solid #30363d;
             color: #8b949e;
         }
 
-        .preview-area img {
-            max-width: 100%;
-            display: none;
+        .card-text table, .rendered-content table {
+            margin: 0.8em 0;
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #30363d;
+        }
+
+        .card-text td, .card-text th,
+        .rendered-content td, .rendered-content th {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #30363d;
+        }
+
+        .card-text pre code, .rendered-content pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* 更新水印样式 */
+        .watermark {
+            display: none;  /* 隐藏原始水印 */
         }
 
         .button-group {
             display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
         }
 
-        button {
+        .preview-btn, .generate-btn {
             background: #238636;
             color: #ffffff;
             border: 1px solid rgba(240,246,252,0.1);
-            padding: 0.5rem 1rem;
+            padding: 5px 16px;
             border-radius: 6px;
             font-size: 16px;
             font-weight: 500;
@@ -120,162 +253,639 @@
             transition: background-color 0.2s;
         }
 
-        button:hover {
+        .preview-btn:hover, .generate-btn:hover {
             background: #2ea043;
         }
 
-        button:disabled {
-            background: #1b1f23;
-            cursor: not-allowed;
-        }
-
-        .result-area {
+        #imagePage {
+            background: #0d1117;  /* GitHub 深色模式背景色 */
             display: none;
-            margin-top: 2rem;
+            width: 700px;  /* 改为 700px */
+            min-height: 100vh;
+            padding: 40px 20px;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 auto;  /* 居中显示 */
         }
 
-        .result-area .split-image {
-            width: 100%;
-            margin-bottom: 1rem;
-            border: 1px solid #30363d;
+        .save-hint {
+            color: #c9d1d9;  /* GitHub 深色模式文本颜色 */
+            font-size: 18px;
+            margin: 20px 0;
+        }
+
+        .generated-image {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .download-btn {
+            background: #238636;
+            color: #ffffff;
+            border: 1px solid rgba(240,246,252,0.1);
+            padding: 5px 16px;
             border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin: 20px 0;
         }
 
-        .download-all {
-            display: block;
-            text-align: center;
-            margin: 1rem 0;
-            color: #58a6ff;
-            text-decoration: none;
-        }
-
-        .download-all:hover {
-            text-decoration: underline;
+        .download-btn:hover {
+            background: #2ea043;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="nav">
-            <a href="../index.html">← 返回主页</a>
-        </div>
-
-        <h1>长图分割工具</h1>
-
-        <div class="card">
-            <div class="input-group">
-                <label for="imageInput">选择要分割的图片：</label>
-                <input type="file" id="imageInput" accept="image/*">
+    <div id="mainPage">
+        <div class="button-area">
+            <div class="settings-area">
+                <div class="input-group">
+                    <label for="emojiInput">表情符号:</label>
+                    <input type="text" id="emojiInput" value="🐱 🐱 🐱 🐱 🐱" placeholder="输入表情符号">
+                </div>
+                <div class="input-group">
+                    <label for="watermarkInput">水印文本:</label>
+                    <input type="text" id="watermarkInput" value="水印" placeholder="输入水印文本">
+                </div>
             </div>
-
-            <div class="input-group">
-                <label for="heightInput">每张图片的最大高度（像素）：</label>
-                <input type="number" id="heightInput" value="1920" min="500" max="5000">
-            </div>
-
-            <div class="preview-area">
-                <span class="placeholder">预览区域</span>
-                <img id="previewImage">
-            </div>
-
             <div class="button-group">
-                <button id="splitButton" disabled>分割图片</button>
-                <button id="resetButton">重置</button>
+                <button class="preview-btn" onclick="previewMarkdown()">预览渲染效果</button>
+                <button class="generate-btn" onclick="generateImage()" style="display: none;">生成图片</button>
+                <a href="../index.html" style="color: #8b949e; text-decoration: none; margin-left: 20px;">返回主页</a>
             </div>
         </div>
-
-        <div id="resultArea" class="result-area">
-            <h2>分割结果</h2>
-            <div id="splitResults"></div>
-            <a href="#" class="download-all" id="downloadAll">下载所有图片</a>
+        <div class="content-area">
+            <div class="content-wrapper">
+                <div class="emoji-container">
+                    <span class="emoji">🐱</span>
+                    <span class="emoji">🐱</span>
+                    <span class="emoji">🐱</span>
+                    <span class="emoji">🐱</span>
+                    <span class="emoji">🐱</span>
+                </div>
+                <div class="card">
+                    <div class="timestamp"></div>
+                    <div class="card-text" contenteditable="true">正文</div>
+                    <div class="rendered-content" style="display: none;"></div>
+                    <div class="stats"></div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script>
-        const imageInput = document.getElementById('imageInput');
-        const heightInput = document.getElementById('heightInput');
-        const previewImage = document.getElementById('previewImage');
-        const placeholder = document.querySelector('.placeholder');
-        const splitButton = document.getElementById('splitButton');
-        const resetButton = document.getElementById('resetButton');
-        const resultArea = document.getElementById('resultArea');
-        const splitResults = document.getElementById('splitResults');
-        const downloadAll = document.getElementById('downloadAll');
+    <div id="imagePage">
+        <div class="button-group">
+            <button class="download-btn" onclick="downloadAllImages()">下载全部图片</button>
+            <a href="../index.html" style="color: #8b949e; text-decoration: none; margin-left: 20px;">返回主页</a>
+        </div>
+        <div id="generatedImages"></div>
+    </div>
 
-        // 预览选择的图片
-        imageInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImage.src = e.target.result;
-                    previewImage.style.display = 'block';
-                    placeholder.style.display = 'none';
-                    splitButton.disabled = false;
-                }
-                reader.readAsDataURL(file);
-            }
+    <script>
+        // 监听文本变化，调整容器高度和更新字数统计
+        document.querySelector('.card-text').addEventListener('input', function() {
+            adjustHeight();
+            updateStats();
+        });
+        
+        function updateTimestamp() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.querySelector('.timestamp').textContent = `${year}-${month}-${day} ${hours}:${minutes}`;
+        }
+
+        // 页面加载时更新时间戳
+        updateTimestamp();
+        
+        function adjustHeight() {
+            const mainPage = document.getElementById('mainPage');
+            const contentHeight = document.querySelector('.content-wrapper').offsetHeight;
+            mainPage.style.height = `${contentHeight + 100}px`; // 额外添加一些padding空间
+        }
+
+        // 更新 emoji 显示
+        document.getElementById('emojiInput').addEventListener('input', function() {
+            const emoji = this.value.trim().split(/\s+/)[0]; // 只取第一个emoji
+            const emojiContainer = document.querySelector('.emoji-container');
+            // 重复5次
+            emojiContainer.innerHTML = Array(5).fill(`<span class="emoji">${emoji}</span>`).join('');
         });
 
-        // 分割图片
-        splitButton.addEventListener('click', async function() {
-            const maxHeight = parseInt(heightInput.value);
-            const img = new Image();
-            img.src = previewImage.src;
+        // 页面加载时初始化水印
+        window.addEventListener('load', function() {
+            updateStats();
+        });
+
+        // 处理多余的空行
+        function normalizeEmptyLines(element) {
+            // 递归处理所有子元素
+            function processNode(node) {
+                // 如果是文本节点，去除连续的换行
+                if (node.nodeType === Node.TEXT_NODE) {
+                    node.textContent = node.textContent.replace(/\n{3,}/g, '\n\n');
+                    return;
+                }
+
+                // 处理块级元素之间的间距
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    const style = window.getComputedStyle(node);
+                    // 如果是块级元素且只包含空白
+                    if (style.display === 'block' && node.textContent.trim() === '' && 
+                        !node.querySelector('img, hr, br')) {
+                        node.remove();
+                        return;
+                    }
+
+                    // 特殊处理列表项
+                    if (node.tagName === 'LI') {
+                        // 移除列表项内的空段落
+                        const emptyParagraphs = node.querySelectorAll('p:empty, p:only-child');
+                        emptyParagraphs.forEach(p => {
+                            if (p.textContent.trim() === '') {
+                                p.remove();
+                            }
+                        });
+                    }
+
+                    // 移除所有块级元素的边距设置
+                    if (node.tagName === 'P' || node.tagName === 'UL' || node.tagName === 'OL' || 
+                        style.display === 'block') {
+                        node.style.margin = '0';
+                    }
+                }
+
+                // 递归处理子元素
+                Array.from(node.childNodes).forEach(processNode);
+            }
+
+            // 开始处理
+            processNode(element);
+
+            // 最后清理任何剩余的连续空行
+            element.innerHTML = element.innerHTML.replace(/(<br\s*\/?>\s*){3,}/gi, '<br><br>');
+            element.innerHTML = element.innerHTML.replace(/(<p>\s*<\/p>\s*){2,}/gi, '<p></p>');
+        }
+
+        function previewMarkdown() {
+            const cardText = document.querySelector('.card-text');
+            const renderedContent = document.querySelector('.rendered-content');
+            const previewBtn = document.querySelector('.preview-btn');
+            const generateBtn = document.querySelector('.generate-btn');
             
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                const width = img.width;
-                const height = img.height;
-                const pieces = Math.ceil(height / maxHeight);
-                
-                splitResults.innerHTML = '';
-                resultArea.style.display = 'block';
-                
-                for (let i = 0; i < pieces; i++) {
-                    const pieceHeight = Math.min(maxHeight, height - i * maxHeight);
-                    canvas.width = width;
-                    canvas.height = pieceHeight;
+            // 渲染 Markdown
+            let html = marked.parse(cardText.textContent);
+            
+            // 处理列表标签后的换行
+            html = html
+                .replace(/(<\/li>)\s*(?:\r\n|\n)?/g, '</li>')
+                .replace(/(<\/ul>)\s*(?:\r\n|\n)?/g, '</ul>')
+                .replace(/(<\/ol>)\s*(?:\r\n|\n)?/g, '</ol>')
+                .replace(/(<li>)\s*(?:\r\n|\n)?/g, '<li>')
+                .replace(/(<ul>)\s*(?:\r\n|\n)?/g, '<ul>')
+                .replace(/(<ol>)\s*(?:\r\n|\n)?/g, '<ol>');
+            
+            renderedContent.innerHTML = html;
+            
+            // 处理多余的空行
+            normalizeEmptyLines(renderedContent);
+            
+            // 隐藏原文本，显示渲染后的内容
+            cardText.style.display = 'none';
+            renderedContent.style.display = 'block';
+            
+            // 切换按钮显示
+            previewBtn.textContent = '返回编辑';
+            generateBtn.style.display = 'block';
+            
+            // 更改预览按钮的点击事件
+            previewBtn.onclick = function() {
+                // 恢复原始显示状态
+                cardText.style.display = 'block';
+                renderedContent.style.display = 'none';
+                generateBtn.style.display = 'none';
+                previewBtn.textContent = '预览渲染效果';
+                previewBtn.onclick = previewMarkdown;
+            };
+            
+            // 确保高度正确
+            adjustHeight();
+        }
+
+        // 使用 Range API 找切分点
+        function findSplitPointWithRange(container, startY, targetY) {
+            try {
+                const range = document.createRange();
+                const walker = document.createTreeWalker(
+                    container,
+                    NodeFilter.SHOW_TEXT,
+                    null,
+                    false
+                );
+
+                let node;
+                let lastGoodNode = null;
+                let lastGoodOffset = 0;
+
+                // 遍历所有文本节点
+                while (node = walker.nextNode()) {
+                    const rects = range.setStart(node, 0) && range.getClientRects();
+                    if (!rects.length) continue;
+
+                    // 如果节点在目标高度之上，记录它
+                    if (rects[0].top < targetY) {
+                        lastGoodNode = node;
+                        lastGoodOffset = node.length;
+                    }
+
+                    // 如果找到跨越目标高度的节点
+                    if (rects[0].bottom > targetY) {
+                        // 在这个节点中找最佳切分点
+                        const text = node.textContent;
+                        const punctuations = ['.', '。', '!', '！', '?', '？', ';', '；'];
+                        let bestOffset = 0;
+
+                        // 从后向前查找标点
+                        for (let i = text.length - 1; i >= 0; i--) {
+                            range.setStart(node, i);
+                            range.setEnd(node, i + 1);
+                            const rect = range.getBoundingClientRect();
+                            
+                            if (rect.top < targetY) {
+                                if (punctuations.includes(text[i])) {
+                                    return {
+                                        node: node,
+                                        offset: i + 1
+                                    };
+                                }
+                                // 记录第一个在目标高度之下的位置
+                                if (!bestOffset) {
+                                    bestOffset = i + 1;
+                                }
+                            }
+                        }
+
+                        // 如果没找到标点，使用最后一个合适的位置
+                        if (bestOffset) {
+                            return {
+                                node: node,
+                                offset: bestOffset
+                            };
+                        }
+                    }
+                }
+
+                // 如果没找到更好的位置，使用最后一个好位置
+                if (lastGoodNode) {
+                    return {
+                        node: lastGoodNode,
+                        offset: lastGoodOffset
+                    };
+                }
+
+                return null;
+            } catch (error) {
+                console.error('Range API 失败:', error);
+                return null;
+            }
+        }
+
+        // 使用 ClientRects 找切分点
+        function findSplitPointWithRects(container, startY, targetY) {
+            try {
+                const textNodes = [];
+                const walker = document.createTreeWalker(
+                    container,
+                    NodeFilter.SHOW_TEXT,
+                    null,
+                    false
+                );
+
+                // 收集所有文本节点
+                let node;
+                while (node = walker.nextNode()) {
+                    const range = document.createRange();
+                    range.selectNodeContents(node);
+                    const rects = range.getClientRects();
                     
+                    if (rects.length) {
+                        textNodes.push({
+                            node: node,
+                            rects: Array.from(rects)
+                        });
+                    }
+                }
+
+                // 找到最接近目标高度的完整行
+                let bestNode = null;
+                let bestOffset = 0;
+                let minDistance = Infinity;
+
+                for (const {node, rects} of textNodes) {
+                    for (let i = 0; i < rects.length; i++) {
+                        const rect = rects[i];
+                        const distance = Math.abs(rect.bottom - targetY);
+                        
+                        if (distance < minDistance && rect.bottom <= targetY) {
+                            minDistance = distance;
+                            bestNode = node;
+                            bestOffset = node.length;
+                        }
+                    }
+                }
+
+                if (bestNode) {
+                    return {
+                        node: bestNode,
+                        offset: bestOffset
+                    };
+                }
+
+                return null;
+            } catch (error) {
+                console.error('ClientRects 失败:', error);
+                return null;
+            }
+        }
+
+        // 简单的固定高度切分
+        function findSplitPointSimple(container, startY, targetY) {
+            return {
+                y: targetY
+            };
+        }
+
+        // 主切分函数
+        async function generateImage() {
+            const mainPage = document.getElementById('mainPage');
+            const imagePage = document.getElementById('imagePage');
+            const buttonGroup = document.querySelector('.button-group');
+            const settingsArea = document.querySelector('.settings-area');
+            const buttonArea = document.querySelector('.button-area');
+            const FIXED_HEIGHT = 1400; // 固定高度
+            const WATERMARK_HEIGHT = 60; // 水印高度
+            const CONTENT_HEIGHT = FIXED_HEIGHT - WATERMARK_HEIGHT; // 内容区域高度
+            
+            try {
+                // 确保高度正确
+                adjustHeight();
+                
+                // 检查元素是否存在
+                const contentElement = document.querySelector('.rendered-content');
+                if (!contentElement) {
+                    throw new Error('找不到渲染内容元素');
+                }
+
+                // 确保内容已渲染
+                if (contentElement.style.display === 'none') {
+                    throw new Error('请先点击预览按钮查看渲染效果');
+                }
+                
+                // 暂时隐藏设置区域和按钮
+                buttonGroup.style.display = 'none';
+                settingsArea.style.display = 'none';
+                buttonArea.style.background = 'transparent';
+                buttonArea.style.border = 'none';
+
+                // 获取所有文本节点及其位置
+                const textNodes = [];
+                const walker = document.createTreeWalker(
+                    contentElement,
+                    NodeFilter.SHOW_TEXT,
+                    {
+                        acceptNode: function(node) {
+                            // 跳过空白节点
+                            return node.textContent.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+                        }
+                    }
+                );
+
+                let node;
+                while (node = walker.nextNode()) {
+                    const range = document.createRange();
+                    range.selectNodeContents(node);
+                    const rects = range.getClientRects();
+                    if (rects.length > 0) {
+                        textNodes.push({
+                            node: node,
+                            top: rects[0].top,
+                            bottom: rects[rects.length - 1].bottom,
+                            height: rects[rects.length - 1].bottom - rects[0].top,
+                            text: node.textContent
+                        });
+                    }
+                }
+
+                // 按位置排序
+                textNodes.sort((a, b) => a.top - b.top);
+
+                // 使用html2canvas捕获页面
+                const canvas = await html2canvas(mainPage, {
+                    backgroundColor: null,
+                    scale: 2,
+                    height: mainPage.offsetHeight,
+                    windowHeight: mainPage.offsetHeight,
+                    useCORS: true,
+                    onclone: function(clonedDoc) {
+                        const clonedContent = clonedDoc.querySelector('.rendered-content');
+                        if (clonedContent) {
+                            clonedContent.style.color = '#c9d1d9';
+                        }
+                    }
+                });
+
+                // 清空之前的图片
+                const generatedImagesContainer = document.getElementById('generatedImages');
+                generatedImagesContainer.innerHTML = '';
+
+                // 计算切分点
+                let currentY = 0;
+                const splitPoints = [];
+                
+                while (currentY < canvas.height) {
+                    // 如果是最后一部分内容
+                    if (canvas.height - currentY <= CONTENT_HEIGHT) {
+                        splitPoints.push({
+                            start: currentY,
+                            end: canvas.height,
+                            needsPadding: true // 标记需要填充
+                        });
+                        break;
+                    }
+                    
+                    // 找到最佳切分点
+                    let bestSplitPoint = currentY + CONTENT_HEIGHT;
+                    let bestNode = null;
+                    
+                    for (const textNode of textNodes) {
+                        const nodeTop = textNode.top * 2;
+                        const nodeBottom = textNode.bottom * 2;
+                        
+                        // 跳过已处理的节点
+                        if (nodeBottom <= currentY) continue;
+                        
+                        // 如果找到跨越目标高度的节点
+                        if (nodeTop < bestSplitPoint && nodeBottom > bestSplitPoint) {
+                            bestNode = textNode;
+                            // 在节点内找最后一个句号
+                            const text = textNode.text;
+                            const punctuations = ['.', '。', '!', '！', '?', '？', ';', '；'];
+                            let lastPunctuationPos = -1;
+                            
+                            for (const punct of punctuations) {
+                                const pos = text.lastIndexOf(punct);
+                                if (pos > lastPunctuationPos) {
+                                    lastPunctuationPos = pos;
+                                }
+                            }
+                            
+                            if (lastPunctuationPos !== -1) {
+                                // 如果找到句号，使用句号位置
+                                const ratio = lastPunctuationPos / text.length;
+                                bestSplitPoint = nodeTop + (nodeBottom - nodeTop) * ratio;
+                            } else {
+                                // 如果没找到句号，使用节点起始位置
+                                bestSplitPoint = nodeTop;
+                            }
+                            break;
+                        }
+                    }
+                    
+                    splitPoints.push({
+                        start: currentY,
+                        end: bestSplitPoint,
+                        needsPadding: false
+                    });
+                    
+                    currentY = bestSplitPoint;
+                }
+
+                // 生成图片
+                for (let i = 0; i < splitPoints.length; i++) {
+                    const splitPoint = splitPoints[i];
+                    const tempCanvas = document.createElement('canvas');
+                    const ctx = tempCanvas.getContext('2d');
+                    
+                    // 设置固定画布高度
+                    tempCanvas.width = canvas.width;
+                    tempCanvas.height = FIXED_HEIGHT;
+                    
+                    // 填充背景
+                    ctx.fillStyle = '#0d1117';
+                    ctx.fillRect(0, 0, canvas.width, tempCanvas.height);
+                    
+                    // 计算实际内容高度
+                    const sourceHeight = splitPoint.end - splitPoint.start;
+                    
+                    // 绘制内容
                     ctx.drawImage(
-                        img,
-                        0, i * maxHeight,  // 源图片裁剪起点
-                        width, pieceHeight,  // 源图片裁剪尺寸
-                        0, 0,  // canvas 绘制起点
-                        width, pieceHeight  // canvas 绘制尺寸
+                        canvas,
+                        0, splitPoint.start,
+                        canvas.width, sourceHeight,
+                        0, 0,
+                        canvas.width, sourceHeight
                     );
                     
-                    const pieceImage = document.createElement('img');
-                    pieceImage.src = canvas.toDataURL('image/png');
-                    pieceImage.className = 'split-image';
-                    splitResults.appendChild(pieceImage);
+                    // 添加水印
+                    const watermarkText = document.getElementById('watermarkInput').value || '水印';
+                    ctx.font = 'italic 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif';
+                    ctx.fillStyle = 'rgba(201, 209, 217, 0.8)';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(watermarkText, canvas.width / 2, FIXED_HEIGHT - (WATERMARK_HEIGHT / 2));
+                    
+                    // 创建图片
+                    const img = document.createElement('img');
+                    img.className = 'generated-image';
+                    img.style.marginBottom = '20px';
+                    img.src = tempCanvas.toDataURL('image/png');
+                    generatedImagesContainer.appendChild(img);
                 }
-            };
+                
+                // 切换显示
+                mainPage.style.display = 'none';
+                imagePage.style.display = 'flex';
+                
+            } catch (error) {
+                console.error('生成图片失败:', error);
+                alert(`生成图片失败: ${error.message}`);
+            } finally {
+                // 恢复原始显示状态
+                buttonGroup.style.display = 'flex';
+                settingsArea.style.display = 'flex';
+                buttonArea.style.background = '#161b22';
+                buttonArea.style.borderBottom = '1px solid #30363d';
+            }
+        }
+
+        // 配置 marked 选项
+        marked.setOptions({
+            breaks: true,  // 支持 GitHub 风格的换行
+            gfm: true,    // 启用 GitHub 风格的 Markdown
+            headerIds: false,  // 禁用标题 ID
+            mangle: false,    // 禁用标题 ID 转义
+            langPrefix: '',   // 不添加 language- 前缀
         });
 
-        // 重置
-        resetButton.addEventListener('click', function() {
-            imageInput.value = '';
-            previewImage.src = '';
-            previewImage.style.display = 'none';
-            placeholder.style.display = 'block';
-            splitButton.disabled = true;
-            resultArea.style.display = 'none';
-            splitResults.innerHTML = '';
+        // 更新统计信息
+        function updateStats() {
+            const watermarkText = document.getElementById('watermarkInput').value || '水印';
+            document.querySelector('.stats').innerHTML = `<span>${watermarkText}</span>`;
+        }
+
+        // 监听水印输入变化
+        document.getElementById('watermarkInput').addEventListener('input', function() {
+            updateStats();
         });
 
-        // 下载所有分割后的图片
-        downloadAll.addEventListener('click', function(e) {
-            e.preventDefault();
-            const images = splitResults.getElementsByTagName('img');
-            Array.from(images).forEach((img, index) => {
-                const link = document.createElement('a');
-                link.href = img.src;
-                link.download = `split_${index + 1}.png`;
-                link.click();
-            });
-        });
+        // 初始调整高度和更新统计
+        adjustHeight();
+        updateStats();
+
+        // 添加下载函数
+        async function downloadAllImages() {
+            const images = document.querySelectorAll('.generated-image');
+            if (images.length === 0) {
+                alert('没有可下载的图片');
+                return;
+            }
+
+            // 创建一个下载链接
+            const downloadLink = document.createElement('a');
+            downloadLink.style.display = 'none';
+            document.body.appendChild(downloadLink);
+
+            // 下载所有图片
+            for (let i = 0; i < images.length; i++) {
+                const image = images[i];
+                const imageName = `split-${i + 1}.png`;
+
+                // 从 base64 URL 创建 Blob
+                const response = await fetch(image.src);
+                const blob = await response.blob();
+                
+                // 创建下载 URL
+                const url = window.URL.createObjectURL(blob);
+                
+                // 设置下载链接
+                downloadLink.href = url;
+                downloadLink.download = imageName;
+                
+                // 触发下载
+                downloadLink.click();
+                
+                // 清理 URL
+                window.URL.revokeObjectURL(url);
+            }
+
+            // 移除下载链接
+            document.body.removeChild(downloadLink);
+        }
     </script>
 </body>
-</html> 
+</html>

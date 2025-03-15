@@ -364,12 +364,36 @@
                     throw new Error('请先点击预览按钮查看渲染效果');
                 }
                 
+                // 收集文本节点信息
+                const textNodes = [];
+                const walker = document.createTreeWalker(
+                    contentElement,
+                    NodeFilter.SHOW_TEXT,
+                    null,
+                    false
+                );
+
+                let node;
+                while (node = walker.nextNode()) {
+                    const range = document.createRange();
+                    range.selectNodeContents(node);
+                    const rect = range.getBoundingClientRect();
+                    
+                    if (rect.height > 0) {
+                        textNodes.push({
+                            text: node.textContent,
+                            top: rect.top,
+                            bottom: rect.bottom
+                        });
+                    }
+                }
+                
                 // 暂时隐藏设置区域和按钮
                 buttonGroup.style.display = 'none';
                 settingsArea.style.display = 'none';
                 buttonArea.style.background = 'transparent';
                 buttonArea.style.border = 'none';
-
+                
                 // 使用html2canvas捕获页面
                 const canvas = await html2canvas(mainPage, {
                     backgroundColor: null,

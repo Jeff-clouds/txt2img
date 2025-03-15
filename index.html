@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>1. 生成图片-2.长按图片保存</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -17,7 +18,7 @@
             margin: 0;
             padding: 0;
             min-height: 100vh;
-            background: #ffffff;  /* GitHub 背景色改为白色 */
+            background: #0d1117;  /* GitHub 深色模式背景色 */
         }
 
         body {
@@ -25,33 +26,62 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;  /* GitHub 字体 */
-            background: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background: #0d1117;
         }
 
         #mainPage {
-            width: 100%;
+            width: 700px;  /* 改为 700px */
             min-height: fit-content;
-            background: #ffffff;
+            background: #0d1117;
             padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
+            margin: 0 auto;  /* 居中显示 */
         }
 
         .button-area {
-            width: 100%;
-            background: #f6f8fa;  /* GitHub 按钮区域背景色 */
-            border-bottom: 1px solid #d0d7de;  /* GitHub 风格分隔线 */
+            width: 700px;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
             padding: 16px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;  /* 改为纵向排列 */
+            align-items: center;
+            gap: 16px;  /* 添加间距 */
+        }
+
+        .settings-area {
+            display: flex;
+            gap: 20px;
             align-items: center;
         }
 
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-group label {
+            color: #c9d1d9;
+            font-size: 14px;
+        }
+
+        .input-group input {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
+            padding: 4px 8px;
+            font-size: 14px;
+            width: 200px;
+        }
+
         .content-area {
-            width: 100%;
+            width: 700px;  /* 改为 700px */
             padding: 30px 10px;
             display: flex;
             flex-direction: column;
@@ -77,145 +107,179 @@
             gap: 5px;
         }
         .card {
-            width: calc(100% - 20px);
-            max-width: 600px;
+            width: 650px;  /* 改为 650px */
             padding: 16px;
-            background: #ffffff;
-            border: 1px solid #d0d7de;  /* GitHub 卡片边框 */
+            background: #161b22;  /* GitHub 深色模式卡片背景色 */
+            border: 1px solid #30363d;  /* GitHub 深色模式边框 */
             border-radius: 6px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-            color: #24292f !important;  /* GitHub 文本颜色 */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            color: #c9d1d9 !important;  /* GitHub 深色模式文本颜色 */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .timestamp {
-            font-size: 12px;
-            color: #57606a;  /* GitHub 次要文本颜色 */
+            font-size: 14px;
+            color: #8b949e;  /* GitHub 深色模式次要文本颜色 */
             text-align: center;
             margin-bottom: 16px;
         }
 
         .stats {
-            font-size: 12px;
-            color: #57606a;
+            font-size: 14px;
+            color: #8b949e;
             margin-top: 16px;
             display: flex;
             justify-content: space-between;
             width: 100%;
             padding-top: 16px;
-            border-top: 1px solid #d0d7de;  /* GitHub 风格分隔线 */
+            border-top: 1px solid #30363d;  /* GitHub 深色模式分隔线 */
         }
 
-        .card-text {
-            font-size: 14px;
+        .card-text, .rendered-content {
+            font-size: 16px;
             line-height: 1.5;
-            color: #24292f;
-            text-align: left;  /* GitHub 文本左对齐 */
-            min-height: 100px;
-        }
-
-        .card-text table {
-            margin: 0.8em 0;
-            width: 100%;
-            border-collapse: collapse;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .card-text td, .card-text th {
-            padding: 8px;
+            color: #c9d1d9;
             text-align: left;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-height: 100px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            width: 100%;
+            display: block;
+            max-width: 100%;
+            overflow: auto;
         }
 
-        .card-text p {
-            margin: 0.8em 0;
+        /* Markdown 样式 */
+        .card-text ul, .card-text ol,
+        .rendered-content ul, .rendered-content ol {
+            margin: 0 !important;
+            padding-left: 2em;
         }
 
-        .card-text h1, .card-text h2, .card-text h3, .card-text h4, .card-text h5, .card-text h6 {
-            margin: 1em 0 0.6em;
-            line-height: 1.3;
+        .card-text ul ul, .rendered-content ul ul {
+            list-style-type: circle;
+            margin: 0 !important;
         }
 
-        .card-text ul, .card-text ol {
-            margin: 0.8em 0;
-            padding-left: 1.5em;
-        }
-
-        .card-text ul ul {
-            list-style-type: disc;
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        .card-text li {
+        .card-text li, .rendered-content li {
             margin: 0.4em 0;
         }
 
-        .card-text blockquote {
-            margin: 0.8em 0;
-            padding: 0.4em 1em;
-        }
-
-        .card-text pre {
-            font-size: 12px;
+        .card-text pre, .rendered-content pre {
+            font-size: 14px;
             line-height: 1.45;
-            background-color: #f6f8fa;  /* GitHub 代码块背景色 */
+            background-color: #0d1117;
             padding: 16px;
             border-radius: 6px;
-            border: 1px solid #d0d7de;
+            border: 1px solid #30363d;
             overflow-x: auto;
             white-space: pre-wrap;
             word-wrap: break-word;
-            color: #24292f;
+            color: #c9d1d9;
+            margin: 0.8em 0 !important;
         }
 
-        .card-text code {
+        .card-text code, .rendered-content code {
             font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-            font-size: 12px;
-            padding: 0.2em 0.4em;
-            background-color: #f6f8fa;
-            border-radius: 6px;
-            color: #24292f;
-        }
-        .watermark {
-            color: rgba(255, 255, 255, 0.8);
             font-size: 14px;
-            margin-top: 20px; /* 增加上边距，确保水印在卡片下方 */
+            padding: 0.2em 0.4em;
+            background-color: rgba(110,118,129,0.4);
+            border-radius: 6px;
+            color: #c9d1d9;
+        }
+
+        .card-text p, .rendered-content p {
+            margin: 0 !important;
+        }
+
+        .card-text h1, .card-text h2, .card-text h3, .card-text h4, .card-text h5, .card-text h6,
+        .rendered-content h1, .rendered-content h2, .rendered-content h3, .rendered-content h4, .rendered-content h5, .rendered-content h6 {
+            margin: 0.5em 0 0.3em !important;
+            line-height: 1.3;
+        }
+
+        /* 特殊处理段落后面紧跟的标题 */
+        .card-text p + h1, .card-text p + h2, .card-text p + h3, .card-text p + h4, .card-text p + h5, .card-text p + h6,
+        .rendered-content p + h1, .rendered-content p + h2, .rendered-content p + h3, .rendered-content p + h4, .rendered-content p + h5, .rendered-content p + h6 {
+            margin-top: 0.3em !important;
+        }
+
+        .card-text blockquote, .rendered-content blockquote {
+            margin: 0.8em 0 !important;
+            padding: 0.4em 1em;
+            border-left: 0.25em solid #30363d;
+            color: #8b949e;
+        }
+
+        .card-text table, .rendered-content table {
+            margin: 0.8em 0;
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #30363d;
+        }
+
+        .card-text td, .card-text th,
+        .rendered-content td, .rendered-content th {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #30363d;
+        }
+
+        .card-text pre code, .rendered-content pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        .watermark {
+            color: rgba(201, 209, 217, 0.8);
+            font-size: 14px;
+            margin-top: 20px;
             text-align: center;
             font-style: italic;
-            width: 100%; /* 确保水印宽度与卡片一致 */
+            width: 100%;
         }
 
-        .generate-btn {
-            background: #2da44e;  /* GitHub 绿色按钮 */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .preview-btn, .generate-btn {
+            background: #238636;
             color: #ffffff;
-            border: 1px solid rgba(27, 31, 36, 0.15);
+            border: 1px solid rgba(240,246,252,0.1);
             padding: 5px 16px;
             border-radius: 6px;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 500;
             cursor: pointer;
-            margin: 20px 0;
             transition: background-color 0.2s;
         }
 
-        .generate-btn:hover {
-            background: #2c974b;
-            transform: none;  /* 移除缩放效果 */
+        .preview-btn:hover, .generate-btn:hover {
+            background: #2ea043;
         }
 
         #imagePage {
+            background: #0d1117;  /* GitHub 深色模式背景色 */
             display: none;
-            width: 100%;
+            width: 700px;  /* 改为 700px */
             min-height: 100vh;
             padding: 40px 20px;
-            background: #f6f8fa;  /* GitHub 背景色 */
             flex-direction: column;
             align-items: center;
+            margin: 0 auto;  /* 居中显示 */
         }
 
         .save-hint {
+            color: #c9d1d9;  /* GitHub 深色模式文本颜色 */
             font-size: 18px;
             margin: 20px 0;
-            color: #24292f;
         }
 
         .generated-image {
@@ -228,7 +292,20 @@
 <body>
     <div id="mainPage">
         <div class="button-area">
-            <button class="generate-btn" onclick="generateImage()">点击按钮生成图片</button>
+            <div class="settings-area">
+                <div class="input-group">
+                    <label for="emojiInput">表情符号:</label>
+                    <input type="text" id="emojiInput" value="🐱 🐱 🐱 🐱 🐱" placeholder="输入表情符号">
+                </div>
+                <div class="input-group">
+                    <label for="watermarkInput">水印文本:</label>
+                    <input type="text" id="watermarkInput" value="水印" placeholder="输入水印文本">
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="preview-btn" onclick="previewMarkdown()">预览渲染效果</button>
+                <button class="generate-btn" onclick="generateImage()" style="display: none;">生成图片</button>
+            </div>
         </div>
         <div class="content-area">
             <div class="content-wrapper">
@@ -241,9 +318,8 @@
                 </div>
                 <div class="card">
                     <div class="timestamp"></div>
-                    <div class="card-text" contenteditable="true">
-                       正文
-                    </div>
+                    <div class="card-text" contenteditable="true">正文</div>
+                    <div class="rendered-content" style="display: none;"></div>
                     <div class="stats"></div>
                 </div>
             </div>
@@ -281,35 +357,143 @@
             mainPage.style.height = `${contentHeight + 100}px`; // 额外添加一些padding空间
         }
 
+        // 更新 emoji 显示
+        document.getElementById('emojiInput').addEventListener('input', function() {
+            const emoji = this.value.trim().split(/\s+/)[0]; // 只取第一个emoji
+            const emojiContainer = document.querySelector('.emoji-container');
+            // 重复5次
+            emojiContainer.innerHTML = Array(5).fill(`<span class="emoji">${emoji}</span>`).join('');
+        });
+
+        // 页面加载时初始化水印
+        window.addEventListener('load', function() {
+            updateStats();
+        });
+
+        // 处理多余的空行
+        function normalizeEmptyLines(element) {
+            // 递归处理所有子元素
+            function processNode(node) {
+                // 如果是文本节点，去除连续的换行
+                if (node.nodeType === Node.TEXT_NODE) {
+                    node.textContent = node.textContent.replace(/\n{3,}/g, '\n\n');
+                    return;
+                }
+
+                // 处理块级元素之间的间距
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    const style = window.getComputedStyle(node);
+                    // 如果是块级元素且只包含空白
+                    if (style.display === 'block' && node.textContent.trim() === '' && 
+                        !node.querySelector('img, hr, br')) {
+                        node.remove();
+                        return;
+                    }
+
+                    // 特殊处理列表项
+                    if (node.tagName === 'LI') {
+                        // 移除列表项内的空段落
+                        const emptyParagraphs = node.querySelectorAll('p:empty, p:only-child');
+                        emptyParagraphs.forEach(p => {
+                            if (p.textContent.trim() === '') {
+                                p.remove();
+                            }
+                        });
+                    }
+
+                    // 移除所有块级元素的边距设置
+                    if (node.tagName === 'P' || node.tagName === 'UL' || node.tagName === 'OL' || 
+                        style.display === 'block') {
+                        node.style.margin = '0';
+                    }
+                }
+
+                // 递归处理子元素
+                Array.from(node.childNodes).forEach(processNode);
+            }
+
+            // 开始处理
+            processNode(element);
+
+            // 最后清理任何剩余的连续空行
+            element.innerHTML = element.innerHTML.replace(/(<br\s*\/?>\s*){3,}/gi, '<br><br>');
+            element.innerHTML = element.innerHTML.replace(/(<p>\s*<\/p>\s*){2,}/gi, '<p></p>');
+        }
+
+        function previewMarkdown() {
+            const cardText = document.querySelector('.card-text');
+            const renderedContent = document.querySelector('.rendered-content');
+            const previewBtn = document.querySelector('.preview-btn');
+            const generateBtn = document.querySelector('.generate-btn');
+            
+            // 渲染 Markdown
+            let html = marked.parse(cardText.textContent);
+            
+            // 处理列表标签后的换行
+            html = html
+                .replace(/(<\/li>)\s*(?:\r\n|\n)?/g, '</li>')
+                .replace(/(<\/ul>)\s*(?:\r\n|\n)?/g, '</ul>')
+                .replace(/(<\/ol>)\s*(?:\r\n|\n)?/g, '</ol>')
+                .replace(/(<li>)\s*(?:\r\n|\n)?/g, '<li>')
+                .replace(/(<ul>)\s*(?:\r\n|\n)?/g, '<ul>')
+                .replace(/(<ol>)\s*(?:\r\n|\n)?/g, '<ol>');
+            
+            renderedContent.innerHTML = html;
+            
+            // 处理多余的空行
+            normalizeEmptyLines(renderedContent);
+            
+            // 隐藏原文本，显示渲染后的内容
+            cardText.style.display = 'none';
+            renderedContent.style.display = 'block';
+            
+            // 切换按钮显示
+            previewBtn.textContent = '返回编辑';
+            generateBtn.style.display = 'block';
+            
+            // 更改预览按钮的点击事件
+            previewBtn.onclick = function() {
+                // 恢复原始显示状态
+                cardText.style.display = 'block';
+                renderedContent.style.display = 'none';
+                generateBtn.style.display = 'none';
+                previewBtn.textContent = '预览渲染效果';
+                previewBtn.onclick = previewMarkdown;
+            };
+            
+            // 确保高度正确
+            adjustHeight();
+        }
+
         async function generateImage() {
             const mainPage = document.getElementById('mainPage');
             const imagePage = document.getElementById('imagePage');
-            const generateBtn = document.querySelector('.generate-btn');
+            const buttonGroup = document.querySelector('.button-group');
+            const settingsArea = document.querySelector('.settings-area');
+            const buttonArea = document.querySelector('.button-area');
             
-            // 暂时隐藏生成按钮
-            generateBtn.style.display = 'none';
+            // 暂时隐藏设置区域和按钮，并移除按钮区域背景
+            buttonGroup.style.display = 'none';
+            settingsArea.style.display = 'none';
+            buttonArea.style.background = 'transparent';
+            buttonArea.style.border = 'none';
             
             try {
-                // 隐藏button-area
-                const buttonArea = document.querySelector('.button-area');
-                buttonArea.style.display = 'none';
-                
                 // 确保高度正确
                 adjustHeight();
                 
                 // 使用html2canvas捕获页面
                 const canvas = await html2canvas(mainPage, {
                     backgroundColor: null,
-                    scale: 2, // 提高清晰度
-                    height: mainPage.offsetHeight, // 使用整个mainPage的高度
+                    scale: 2,
+                    height: mainPage.offsetHeight,
                     windowHeight: mainPage.offsetHeight,
-                    useCORS: true, // 允许跨域
-                    logging: true, // 开启日志以便调试
+                    useCORS: true,
+                    logging: true,
                     onclone: function(clonedDoc) {
-                        // 确保克隆的DOM中文字颜色正确
-                        const clonedCard = clonedDoc.querySelector('.card-text');
-                        if (clonedCard) {
-                            clonedCard.style.color = 'rgba(255, 255, 255, 0.8)';
+                        const clonedContent = clonedDoc.querySelector('.rendered-content');
+                        if (clonedContent) {
+                            clonedContent.style.color = '#c9d1d9';
                         }
                     }
                 });
@@ -324,22 +508,44 @@
                 mainPage.style.display = 'none';
                 imagePage.style.display = 'flex';
                 
-                // 恢复button-area显示状态，以便返回时可见
-                buttonArea.style.display = 'flex';
+                // 恢复原始显示状态
+                buttonGroup.style.display = 'flex';
+                settingsArea.style.display = 'flex';
+                buttonArea.style.background = '#161b22';
+                buttonArea.style.borderBottom = '1px solid #30363d';
             } catch (error) {
                 console.error('生成图片失败:', error);
                 alert('生成图片失败，请重试');
-                generateBtn.style.display = 'block';
+                // 恢复原始显示状态
+                buttonGroup.style.display = 'flex';
+                settingsArea.style.display = 'flex';
+                buttonArea.style.background = '#161b22';
+                buttonArea.style.borderBottom = '1px solid #30363d';
             }
         }
+
+        // 配置 marked 选项
+        marked.setOptions({
+            breaks: true,  // 支持 GitHub 风格的换行
+            gfm: true,    // 启用 GitHub 风格的 Markdown
+            headerIds: false,  // 禁用标题 ID
+            mangle: false,    // 禁用标题 ID 转义
+            langPrefix: '',   // 不添加 language- 前缀
+        });
 
         // 更新统计信息
         function updateStats() {
             const text = document.querySelector('.card-text').textContent;
             const charCount = text.trim().length;
+            const watermarkText = document.getElementById('watermarkInput').value || '水印';
             const formattedCount = charCount.toLocaleString();
-            document.querySelector('.stats').innerHTML = `<span>文本</span><span>${formattedCount}字</span>`;
+            document.querySelector('.stats').innerHTML = `<span>${watermarkText}</span><span>${formattedCount}字</span>`;
         }
+
+        // 监听水印输入变化
+        document.getElementById('watermarkInput').addEventListener('input', function() {
+            updateStats();
+        });
 
         // 初始调整高度和更新统计
         adjustHeight();

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>长图分割 - Markdown 图片生成器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: #0d1117;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            color: #c9d1d9;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .nav {
+            margin-bottom: 2rem;
+        }
+
+        .nav a {
+            color: #58a6ff;
+            text-decoration: none;
+        }
+
+        .nav a:hover {
+            text-decoration: underline;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #58a6ff;
+        }
+
+        .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #c9d1d9;
+        }
+
+        .input-group input[type="file"],
+        .input-group input[type="number"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            background: #0d1117;
+            color: #c9d1d9;
+            margin-bottom: 1rem;
+        }
+
+        .input-group input[type="file"] {
+            padding: 0.5rem 0;
+        }
+
+        .preview-area {
+            width: 100%;
+            min-height: 200px;
+            border: 2px dashed #30363d;
+            border-radius: 6px;
+            margin: 1rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8b949e;
+        }
+
+        .preview-area img {
+            max-width: 100%;
+            display: none;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        button {
+            background: #238636;
+            color: #ffffff;
+            border: 1px solid rgba(240,246,252,0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background: #2ea043;
+        }
+
+        button:disabled {
+            background: #1b1f23;
+            cursor: not-allowed;
+        }
+
+        .result-area {
+            display: none;
+            margin-top: 2rem;
+        }
+
+        .result-area .split-image {
+            width: 100%;
+            margin-bottom: 1rem;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+        }
+
+        .download-all {
+            display: block;
+            text-align: center;
+            margin: 1rem 0;
+            color: #58a6ff;
+            text-decoration: none;
+        }
+
+        .download-all:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav">
+            <a href="../index.html">← 返回主页</a>
+        </div>
+
+        <h1>长图分割工具</h1>
+
+        <div class="card">
+            <div class="input-group">
+                <label for="imageInput">选择要分割的图片：</label>
+                <input type="file" id="imageInput" accept="image/*">
+            </div>
+
+            <div class="input-group">
+                <label for="heightInput">每张图片的最大高度（像素）：</label>
+                <input type="number" id="heightInput" value="1920" min="500" max="5000">
+            </div>
+
+            <div class="preview-area">
+                <span class="placeholder">预览区域</span>
+                <img id="previewImage">
+            </div>
+
+            <div class="button-group">
+                <button id="splitButton" disabled>分割图片</button>
+                <button id="resetButton">重置</button>
+            </div>
+        </div>
+
+        <div id="resultArea" class="result-area">
+            <h2>分割结果</h2>
+            <div id="splitResults"></div>
+            <a href="#" class="download-all" id="downloadAll">下载所有图片</a>
+        </div>
+    </div>
+
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const heightInput = document.getElementById('heightInput');
+        const previewImage = document.getElementById('previewImage');
+        const placeholder = document.querySelector('.placeholder');
+        const splitButton = document.getElementById('splitButton');
+        const resetButton = document.getElementById('resetButton');
+        const resultArea = document.getElementById('resultArea');
+        const splitResults = document.getElementById('splitResults');
+        const downloadAll = document.getElementById('downloadAll');
+
+        // 预览选择的图片
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    previewImage.style.display = 'block';
+                    placeholder.style.display = 'none';
+                    splitButton.disabled = false;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 分割图片
+        splitButton.addEventListener('click', async function() {
+            const maxHeight = parseInt(heightInput.value);
+            const img = new Image();
+            img.src = previewImage.src;
+            
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const width = img.width;
+                const height = img.height;
+                const pieces = Math.ceil(height / maxHeight);
+                
+                splitResults.innerHTML = '';
+                resultArea.style.display = 'block';
+                
+                for (let i = 0; i < pieces; i++) {
+                    const pieceHeight = Math.min(maxHeight, height - i * maxHeight);
+                    canvas.width = width;
+                    canvas.height = pieceHeight;
+                    
+                    ctx.drawImage(
+                        img,
+                        0, i * maxHeight,  // 源图片裁剪起点
+                        width, pieceHeight,  // 源图片裁剪尺寸
+                        0, 0,  // canvas 绘制起点
+                        width, pieceHeight  // canvas 绘制尺寸
+                    );
+                    
+                    const pieceImage = document.createElement('img');
+                    pieceImage.src = canvas.toDataURL('image/png');
+                    pieceImage.className = 'split-image';
+                    splitResults.appendChild(pieceImage);
+                }
+            };
+        });
+
+        // 重置
+        resetButton.addEventListener('click', function() {
+            imageInput.value = '';
+            previewImage.src = '';
+            previewImage.style.display = 'none';
+            placeholder.style.display = 'block';
+            splitButton.disabled = true;
+            resultArea.style.display = 'none';
+            splitResults.innerHTML = '';
+        });
+
+        // 下载所有分割后的图片
+        downloadAll.addEventListener('click', function(e) {
+            e.preventDefault();
+            const images = splitResults.getElementsByTagName('img');
+            Array.from(images).forEach((img, index) => {
+                const link = document.createElement('a');
+                link.href = img.src;
+                link.download = `split_${index + 1}.png`;
+                link.click();
+            });
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,344 @@
+<!-- Version 1.4 -->
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1. 生成图片-2.长按图片保存</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: #250f4c;  /* 添加背景色 */
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #250f4c;  /* 添加背景色 */
+        }
+
+        #mainPage {
+            width: 100%;
+            min-height: fit-content;
+            background: #250f4c;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .button-area {
+            width: 100%;
+            background: #1D093F;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .content-area {
+            width: 100%;
+            padding: 30px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .emoji-container {
+            width: 100%;
+            display: flex;
+            justify-content: space-evenly;
+            padding: 10px 0;
+        }
+
+        .emoji {
+            font-size: 24px;
+        }
+
+        .content-wrapper {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .card {
+            width: calc(100% - 20px);
+            max-width: 600px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+
+        .timestamp {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+            text-align: center;
+            margin-bottom: 22px;
+        }
+
+        .stats {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 22px;
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .card-text {
+            font-size: 14px;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.8);
+            text-align: justify;
+            min-height: 100px;
+        }
+
+        .card-text table {
+            margin: 0.8em 0;
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card-text td, .card-text th {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card-text p {
+            margin: 0.8em 0;
+        }
+
+        .card-text h1, .card-text h2, .card-text h3, .card-text h4, .card-text h5, .card-text h6 {
+            margin: 1em 0 0.6em;
+            line-height: 1.3;
+        }
+
+        .card-text ul, .card-text ol {
+            margin: 0.8em 0;
+            padding-left: 1.5em;
+        }
+
+        .card-text ul ul {
+            list-style-type: disc;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .card-text li {
+            margin: 0.4em 0;
+        }
+
+        .card-text blockquote {
+            margin: 0.8em 0;
+            padding: 0.4em 1em;
+        }
+
+        .card-text pre {
+            font-size: 12px;
+            line-height: 1.4;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 6px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .card-text code {
+            font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+            font-size: 12px;
+            padding: 2px 4px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .watermark {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            margin-top: 20px; /* 增加上边距，确保水印在卡片下方 */
+            text-align: center;
+            font-style: italic;
+            width: 100%; /* 确保水印宽度与卡片一致 */
+        }
+
+        .generate-btn {
+            background: linear-gradient(135deg, #CE9FFC, #7367F0);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 9999px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: transform 0.2s;
+        }
+
+        .generate-btn:hover {
+            transform: scale(1.05);
+        }
+
+        #imagePage {
+            display: none;
+            width: 100%;
+            min-height: 100vh;
+            padding: 40px 20px;
+            background: #D6D5FF;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .save-hint {
+            font-size: 18px;
+            margin: 20px 0;
+            color: #333;
+        }
+
+        .generated-image {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="mainPage">
+        <div class="button-area">
+            <button class="generate-btn" onclick="generateImage()">点击按钮生成图片</button>
+        </div>
+        <div class="content-area">
+            <div class="content-wrapper">
+                <div class="emoji-container">
+                    <span class="emoji">🐱</span>
+                    <span class="emoji">🐱</span>
+                    <span class="emoji">🐱</span>
+                    <span class="emoji">🐱</span>
+                    <span class="emoji">🐱</span>
+                </div>
+                <div class="card">
+                    <div class="timestamp"></div>
+                    <div class="card-text" contenteditable="true">
+                       正文
+                    </div>
+                    <div class="stats"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="imagePage">
+        <div class="save-hint">👇长按下方图片保存到相册👇</div>
+        <img class="generated-image" />
+    </div>
+
+    <script>
+        // 监听文本变化，调整容器高度和更新字数统计
+        document.querySelector('.card-text').addEventListener('input', function() {
+            adjustHeight();
+            updateStats();
+        });
+        
+        function updateTimestamp() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.querySelector('.timestamp').textContent = `${year}-${month}-${day} ${hours}:${minutes}`;
+        }
+
+        // 页面加载时更新时间戳
+        updateTimestamp();
+        
+        function adjustHeight() {
+            const mainPage = document.getElementById('mainPage');
+            const contentHeight = document.querySelector('.content-wrapper').offsetHeight;
+            mainPage.style.height = `${contentHeight + 100}px`; // 额外添加一些padding空间
+        }
+
+        async function generateImage() {
+            const mainPage = document.getElementById('mainPage');
+            const imagePage = document.getElementById('imagePage');
+            const generateBtn = document.querySelector('.generate-btn');
+            
+            // 暂时隐藏生成按钮
+            generateBtn.style.display = 'none';
+            
+            try {
+                // 隐藏button-area
+                const buttonArea = document.querySelector('.button-area');
+                buttonArea.style.display = 'none';
+                
+                // 确保高度正确
+                adjustHeight();
+                
+                // 使用html2canvas捕获页面
+                const canvas = await html2canvas(mainPage, {
+                    backgroundColor: null,
+                    scale: 2, // 提高清晰度
+                    height: mainPage.offsetHeight, // 使用整个mainPage的高度
+                    windowHeight: mainPage.offsetHeight,
+                    useCORS: true, // 允许跨域
+                    logging: true, // 开启日志以便调试
+                    onclone: function(clonedDoc) {
+                        // 确保克隆的DOM中文字颜色正确
+                        const clonedCard = clonedDoc.querySelector('.card-text');
+                        if (clonedCard) {
+                            clonedCard.style.color = 'rgba(255, 255, 255, 0.8)';
+                        }
+                    }
+                });
+                
+                // 将canvas转换为图片URL
+                const imageUrl = canvas.toDataURL('image/png');
+                
+                // 设置生成的图片
+                document.querySelector('.generated-image').src = imageUrl;
+                
+                // 切换显示
+                mainPage.style.display = 'none';
+                imagePage.style.display = 'flex';
+                
+                // 恢复button-area显示状态，以便返回时可见
+                buttonArea.style.display = 'flex';
+            } catch (error) {
+                console.error('生成图片失败:', error);
+                alert('生成图片失败，请重试');
+                generateBtn.style.display = 'block';
+            }
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            const text = document.querySelector('.card-text').textContent;
+            const charCount = text.trim().length;
+            const formattedCount = charCount.toLocaleString();
+            document.querySelector('.stats').innerHTML = `<span>文本</span><span>${formattedCount}字</span>`;
+        }
+
+        // 初始调整高度和更新统计
+        adjustHeight();
+        updateStats();
+    </script>
+</body>
+</html>

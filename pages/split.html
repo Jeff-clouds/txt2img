@@ -10,6 +10,20 @@
     <link rel="stylesheet" href="../styles/shared.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        function detectDevice() {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+                || window.innerWidth <= 768;
+            
+            // 如果是移动设备且当前在split.html，则跳转到split-mobile.html
+            if (isMobile && window.location.pathname.includes('split.html')) {
+                window.location.href = 'split-mobile.html';
+            }
+        }
+
+        // 页面加载时执行检测
+        window.addEventListener('load', detectDevice);
+    </script>
 </head>
 <body>
     <div id="mainPage">

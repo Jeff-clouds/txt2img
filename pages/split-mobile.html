@@ -5,11 +5,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>1. 生成图片-2.长按图片保存</title>
-    <script async src="https://pagead2.googlesyndleware.com/pagead/js/adsbygoogle.js?client=ca-pub-8778257573911049"
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8778257573911049"
      crossorigin="anonymous"></script>
     <link rel="stylesheet" href="../styles/shared.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        function detectDevice() {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+                || window.innerWidth <= 768;
+            
+            // 如果是桌面设备且当前在split-mobile.html，则跳转到split.html
+            if (!isMobile && window.location.pathname.includes('split-mobile.html')) {
+                window.location.href = 'split.html';
+            }
+        }
+
+        // 页面加载时执行检测
+        window.addEventListener('load', detectDevice);
+    </script>
 </head>
 <body>
     <div id="mainPage">
@@ -27,6 +41,7 @@
             <div class="button-group">
                 <button class="preview-btn" onclick="previewMarkdown()">预览渲染效果</button>
                 <button class="generate-btn" onclick="generateImage()" style="display: none;">生成图片</button>
+                <a href="about.html" style="color: #8b949e; text-decoration: none; margin-left: 20px;">关于</a>
                 <a href="../index.html" style="color: #8b949e; text-decoration: none; margin-left: 20px;">返回主页</a>
             </div>
         </div>

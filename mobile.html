@@ -31,7 +31,8 @@
         }
 
         #mainPage {
-            width: 700px;  /* 改为 700px */
+            width: 100%;  /* 改为100% */
+            max-width: 700px;  /* 设置最大宽度 */
             min-height: fit-content;
             background: #0d1117;
             padding: 0;
@@ -39,18 +40,19 @@
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
-            margin: 0 auto;  /* 居中显示 */
+            margin: 0 auto;
         }
 
         .button-area {
-            width: 700px;
+            width: 100%;  /* 改为100% */
+            max-width: 700px;
             background: #161b22;
             border-bottom: 1px solid #30363d;
             padding: 16px;
             display: flex;
-            flex-direction: column;  /* 改为纵向排列 */
+            flex-direction: column;
             align-items: center;
-            gap: 16px;  /* 添加间距 */
+            gap: 16px;
         }
 
         .settings-area {
@@ -81,7 +83,8 @@
         }
 
         .content-area {
-            width: 700px;  /* 改为 700px */
+            width: 100%;  /* 改为100% */
+            max-width: 700px;
             padding: 30px 10px;
             display: flex;
             flex-direction: column;
@@ -107,7 +110,8 @@
             gap: 5px;
         }
         .card {
-            width: 650px;  /* 改为 650px */
+            width: 100%;  /* 改为100% */
+            max-width: 650px;
             padding: 16px;
             background: #161b22;  /* GitHub 深色模式卡片背景色 */
             border: 1px solid #30363d;  /* GitHub 深色模式边框 */
@@ -266,14 +270,15 @@
         }
 
         #imagePage {
-            background: #0d1117;  /* GitHub 深色模式背景色 */
+            background: #0d1117;
             display: none;
-            width: 700px;  /* 改为 700px */
+            width: 100%;  /* 改为100% */
+            max-width: 700px;
             min-height: 100vh;
             padding: 40px 20px;
             flex-direction: column;
             align-items: center;
-            margin: 0 auto;  /* 居中显示 */
+            margin: 0 auto;
         }
 
         .save-hint {
@@ -287,17 +292,54 @@
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
+
+        /* 添加移动设备的响应式样式 */
+        @media screen and (max-width: 768px) {
+            .settings-area {
+                flex-direction: column;
+                gap: 10px;
+                width: 100%;
+            }
+
+            .input-group {
+                width: 100%;
+            }
+
+            .input-group input {
+                width: 100%;
+            }
+
+            .button-group {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .button-group button,
+            .button-group a {
+                width: 100%;
+                margin: 5px 0;
+                text-align: center;
+            }
+
+            .content-area {
+                padding: 20px 10px;
+            }
+
+            .card {
+                padding: 12px;
+            }
+        }
     </style>
     <script>
         function detectDevice() {
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
                 || window.innerWidth <= 768;
             
-            // 如果是移动设备且当前不在mobile.html，则跳转到mobile.html
-            if (isMobile && !window.location.pathname.includes('mobile.html')) {
+            // 如果是桌面设备且当前在mobile.html，则跳转到index.html
+            if (!isMobile && window.location.pathname.includes('mobile.html')) {
                 // 获取当前仓库的基础URL
                 const baseUrl = window.location.href.split('/').slice(0, -1).join('/');
-                window.location.href = `${baseUrl}/mobile.html`;
+                window.location.href = `${baseUrl}/index.html`;
             }
         }
 
@@ -321,8 +363,8 @@
             <div class="button-group">
                 <button class="preview-btn" onclick="previewMarkdown()">预览渲染效果</button>
                 <button class="generate-btn" onclick="generateImage()" style="display: none;">生成图片</button>
-                <a href="pages/about.html" style="color: #8b949e; text-decoration: none; margin-left: 20px;">关于</a>
-                <a href="pages/split.html" style="color: #8b949e; text-decoration: none; margin-left: 20px;">长图分割</a>
+                <a href="pages/about-mobile.html" style="color: #8b949e; text-decoration: none; margin-left: 20px;">关于</a>
+                <a href="pages/split-mobile.html" style="color: #8b949e; text-decoration: none; margin-left: 20px;">长图分割</a>
             </div>
         </div>
         <div class="content-area">

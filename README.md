@@ -1,28 +1,35 @@
-# Text to Image Generator
+# Markdown 图片生成器
 
-A simple web application that converts text input into a beautifully styled image. Perfect for creating shareable content for social media.
+一个简单的网页工具，可以将 Markdown 文本转换为精美的图片。
 
-## Features
+## 功能特点
 
-- Real-time text editing
-- Character count
-- Beautiful card design with blur effects
-- One-click image generation
-- Mobile-friendly design
+- 支持 Markdown 语法实时预览
+- 自定义表情符号装饰
+- 自定义水印文本
+- GitHub 暗色主题风格
+- 支持代码高亮
+- 响应式设计
+- 一键生成图片
+- 长按保存图片
 
-## Usage
+## 使用方法
 
-1. Open the website
-2. Type or paste your text in the editable area
-3. Click "Generate Image" button
-4. Long press the generated image to save it to your device
+1. 在文本框中输入 Markdown 文本
+2. 可选：自定义顶部表情符号
+3. 可选：自定义水印文本
+4. 点击"预览渲染效果"查看效果
+5. 点击"生成图片"生成最终图片
+6. 长按生成的图片即可保存
 
-## Live Demo
+## 技术栈
 
-Visit the live demo at: https://[your-username].github.io/[repository-name]/
+- HTML5
+- CSS3
+- JavaScript
+- marked.js (Markdown 渲染)
+- html2canvas (图片生成)
 
-## Setup
-Simply host the files on any web server or open index.html in a browser.
+## 开源协议
 
-## Dependencies
-- html2canvas v1.4.1 
+MIT 

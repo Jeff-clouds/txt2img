@@ -17,7 +17,7 @@
             margin: 0;
             padding: 0;
             min-height: 100vh;
-            background: #250f4c;  /* 添加背景色 */
+            background: #ffffff;  /* GitHub 背景色改为白色 */
         }
 
         body {
@@ -25,14 +25,14 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-family: system-ui, -apple-system, sans-serif;
-            background: #250f4c;  /* 添加背景色 */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;  /* GitHub 字体 */
+            background: #ffffff;
         }
 
         #mainPage {
             width: 100%;
             min-height: fit-content;
-            background: #250f4c;
+            background: #ffffff;
             padding: 0;
             display: flex;
             flex-direction: column;
@@ -42,8 +42,9 @@
 
         .button-area {
             width: 100%;
-            background: #1D093F;
-            padding: 20px;
+            background: #f6f8fa;  /* GitHub 按钮区域背景色 */
+            border-bottom: 1px solid #d0d7de;  /* GitHub 风格分隔线 */
+            padding: 16px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -78,36 +79,37 @@
         .card {
             width: calc(100% - 20px);
             max-width: 600px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            color: rgba(255, 255, 255, 0.8) !important;
+            padding: 16px;
+            background: #ffffff;
+            border: 1px solid #d0d7de;  /* GitHub 卡片边框 */
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            color: #24292f !important;  /* GitHub 文本颜色 */
         }
 
         .timestamp {
             font-size: 12px;
-            color: rgba(255, 255, 255, 0.4);
+            color: #57606a;  /* GitHub 次要文本颜色 */
             text-align: center;
-            margin-bottom: 22px;
+            margin-bottom: 16px;
         }
 
         .stats {
             font-size: 12px;
-            color: rgba(255, 255, 255, 0.4);
-            margin-top: 22px;
+            color: #57606a;
+            margin-top: 16px;
             display: flex;
             justify-content: space-between;
             width: 100%;
+            padding-top: 16px;
+            border-top: 1px solid #d0d7de;  /* GitHub 风格分隔线 */
         }
 
         .card-text {
             font-size: 14px;
             line-height: 1.5;
-            color: rgba(255, 255, 255, 0.8);
-            text-align: justify;
+            color: #24292f;
+            text-align: left;  /* GitHub 文本左对齐 */
             min-height: 100px;
         }
 
@@ -154,23 +156,24 @@
 
         .card-text pre {
             font-size: 12px;
-            line-height: 1.4;
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 10px;
+            line-height: 1.45;
+            background-color: #f6f8fa;  /* GitHub 代码块背景色 */
+            padding: 16px;
             border-radius: 6px;
+            border: 1px solid #d0d7de;
             overflow-x: auto;
             white-space: pre-wrap;
             word-wrap: break-word;
-            color: rgba(255, 255, 255, 0.8);
+            color: #24292f;
         }
 
         .card-text code {
-            font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
             font-size: 12px;
-            padding: 2px 4px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            color: rgba(255, 255, 255, 0.8);
+            padding: 0.2em 0.4em;
+            background-color: #f6f8fa;
+            border-radius: 6px;
+            color: #24292f;
         }
         .watermark {
             color: rgba(255, 255, 255, 0.8);
@@ -182,19 +185,21 @@
         }
 
         .generate-btn {
-            background: linear-gradient(135deg, #CE9FFC, #7367F0);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 9999px;
-            font-size: 16px;
+            background: #2da44e;  /* GitHub 绿色按钮 */
+            color: #ffffff;
+            border: 1px solid rgba(27, 31, 36, 0.15);
+            padding: 5px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
             margin: 20px 0;
-            transition: transform 0.2s;
+            transition: background-color 0.2s;
         }
 
         .generate-btn:hover {
-            transform: scale(1.05);
+            background: #2c974b;
+            transform: none;  /* 移除缩放效果 */
         }
 
         #imagePage {
@@ -202,7 +207,7 @@
             width: 100%;
             min-height: 100vh;
             padding: 40px 20px;
-            background: #D6D5FF;
+            background: #f6f8fa;  /* GitHub 背景色 */
             flex-direction: column;
             align-items: center;
         }
@@ -210,7 +215,7 @@
         .save-hint {
             font-size: 18px;
             margin: 20px 0;
-            color: #333;
+            color: #24292f;
         }
 
         .generated-image {
